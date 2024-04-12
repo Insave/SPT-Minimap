@@ -16,6 +16,7 @@ namespace CactusPie.MapLocation.Patches
         public static void PatchPostFix()
         {
             GameWorld gameWorld = Singleton<GameWorld>.Instance;
+            MapLocationPlugin.MapLocationLogger.LogError("Patch: Creating Controller");
 
             if (gameWorld == null)
             {

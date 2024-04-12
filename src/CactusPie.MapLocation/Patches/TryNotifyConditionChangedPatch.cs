@@ -19,11 +19,12 @@ namespace CactusPie.MapLocation.Patches
 
         protected override MethodBase GetTargetMethod()
         {
+            
             foreach (Type type in typeof(EFT.AbstractGame).Assembly.GetTypes())
             {
-                MethodInfo method = type.GetMethod("TryNotifyConditionChanged", BindingFlags.NonPublic | BindingFlags.Instance);
+                MethodInfo method = type.GetMethod("TryNotifyConditionChanged", BindingFlags.Public | BindingFlags.Instance);
 
-                if (method != null && type.BaseType == typeof(QuestControllerClass))
+                if (method != null && type.BaseType == typeof(AbstractQuestControllerClass))
                 {
                     return method;
                 }

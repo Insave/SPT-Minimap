@@ -12,6 +12,7 @@ using EFT;
 using EFT.Interactive;
 using EmbedIO;
 using EmbedIO.Actions;
+using StayInTarkov.Coop;
 using UnityEngine;
 
 namespace CactusPie.MapLocation.Services
@@ -116,7 +117,7 @@ namespace CactusPie.MapLocation.Services
             IReadOnlyList<QuestData> quests = _questDataService.QuestMarkers;
             var response = new QuestDataResponse
             {
-                Quests = quests,
+                Quests = quests.ToArray(),
             };
 
             return context.SendDataAsync(response);
@@ -130,11 +131,13 @@ namespace CactusPie.MapLocation.Services
             }
 
             string mapName = _player.Location;
-            Vector3 playerPosition = _player.Position;
-            Vector2 playerRotation = _player.Rotation;
+            Vector3 playerPosition = ((IPlayer)_player).Position;
+            Vector2 playerRotation = ((IPlayer)_player).Rotation;
 
-            List<BotData> botLocations = _botDataService.SpawnedBots.Values.Select(
-                    bot => new BotData
+            List<Common.Requests.Data.BotData> botLocations = new List<Common.Requests.Data.BotData>();
+            
+            botLocations = _botDataService.SpawnedBots.Values.Select(
+                    bot => new Common.Requests.Data.BotData
                     {
                         BotId = bot.Id,
                         BotType = _botDataService.GetBotType(bot),

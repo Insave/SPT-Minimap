@@ -141,7 +141,7 @@ public partial class MainWindow : Window
 
                     if (lastReceivedPosition.BotLocations != null)
                     {
-                        _mapControl.SetBotGameLocations(lastReceivedPosition.BotLocations, _currentMapData.AutomaticallySwitchLevels);
+                        _mapControl.SetBotGameLocations(lastReceivedPosition.BotLocations);
                     }
                 }
 

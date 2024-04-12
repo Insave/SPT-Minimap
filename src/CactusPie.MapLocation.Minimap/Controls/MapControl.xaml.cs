@@ -161,7 +161,7 @@ public partial class MapControl : UserControl
         _playerDotRotation.Angle = angle;
     }
 
-    public void SetBotGameLocations(List<BotLocation> botLocations, bool useCustomBounds)
+    public void SetBotGameLocations(List<BotLocation> botLocations)
     {
         // Remove bots that no longer exist
         List<int> botIdsToRemove =
@@ -200,21 +200,17 @@ public partial class MapControl : UserControl
             double transformedZPosition = 0;
 
             bool foundMatchingBound = false;
-
-            if (useCustomBounds)
+            foreach (BoundData customBound in _currentMapData.SelectedMap!.CustomBounds)
             {
-                foreach (BoundData customBound in _currentMapData.SelectedMap!.CustomBounds)
+                if (customBound.IsValidForGamePosition(
+                        botLocation.XPosition,
+                        botLocation.ZPosition,
+                        botLocation.YPosition))
                 {
-                    if (customBound.IsValidForGamePosition(
-                            botLocation.XPosition,
-                            botLocation.ZPosition,
-                            botLocation.YPosition))
-                    {
-                        transformedXPosition = customBound.TransformXPosition(botLocation.XPosition) - 10;
-                        transformedZPosition = customBound.TransformZPosition(botLocation.ZPosition) - 10;
-                        foundMatchingBound = true;
-                        break;
-                    }
+                    transformedXPosition = customBound.TransformXPosition(botLocation.XPosition) - 10;
+                    transformedZPosition = customBound.TransformZPosition(botLocation.ZPosition) - 10;
+                    foundMatchingBound = true;
+                    break;
                 }
             }
 
@@ -228,7 +224,22 @@ public partial class MapControl : UserControl
             {
                 Canvas.SetLeft(botMarker, transformedXPosition);
                 Canvas.SetTop(botMarker, transformedZPosition);
-                botMarker.Visibility = visibility;
+                if (botLocation.BotType == BotType.Player)
+                {
+                    botMarker.Visibility = (App.AppConfig.ShowPlayers.GetValueOrDefault())
+                        ? Visibility.Visible
+                        : Visibility.Hidden;
+                }
+                else if (botLocation.BotType == BotType.DeadPlayer)
+                {
+                    botMarker.Visibility = (App.AppConfig.ShowDeadPlayers.GetValueOrDefault())
+                        ? Visibility.Visible
+                        : Visibility.Hidden;
+                }
+                else
+                {
+                    botMarker.Visibility = visibility;
+                }
             }
             else
             {
@@ -238,6 +249,8 @@ public partial class MapControl : UserControl
                     BotType.Usec => "circle_blue.png",
                     BotType.Scav => "circle_yellow.png",
                     BotType.Boss => "circle_purple.png",
+                    BotType.Player => "circle_green.png",
+                    BotType.DeadPlayer => "circle_greendead.png",
                     _ => "circle_orange_brown.png",
                 };
 
@@ -250,8 +263,23 @@ public partial class MapControl : UserControl
                 };
 
                 image.RenderTransform = scaleTransform;
-                image.Visibility = visibility;
-
+                if (botLocation.BotType == BotType.Player)
+                {
+                    image.Visibility = (App.AppConfig.ShowPlayers.GetValueOrDefault())
+                        ? Visibility.Visible
+                        : Visibility.Hidden;
+                }
+                else if (botLocation.BotType == BotType.DeadPlayer)
+                {
+                    image.Visibility = (App.AppConfig.ShowDeadPlayers.GetValueOrDefault())
+                        ? Visibility.Visible
+                        : Visibility.Hidden;
+                }
+                else
+                {
+                    image.Visibility = visibility;
+                }
+                
                 PlayerOverlayCanvas.Children.Add(image);
 
                 Canvas.SetLeft(image, transformedXPosition);
@@ -459,7 +487,7 @@ public partial class MapControl : UserControl
 
         if (lastReceivedPosition.BotLocations != null)
         {
-            SetBotGameLocations(lastReceivedPosition.BotLocations, _currentMapData.AutomaticallySwitchLevels);
+            SetBotGameLocations(lastReceivedPosition.BotLocations);
         }
 
     }
